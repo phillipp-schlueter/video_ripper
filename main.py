@@ -1,6 +1,7 @@
 # the yt-dlp.exe must be placed in the same folder as this script
 import os
 import tkinter as tk
+import subprocess
 from tkinter import ttk
 from tkinter.filedialog import askdirectory
 
@@ -18,33 +19,33 @@ def show_message(message, color):
     status_label.after(3000, lambda: status_label.config(text=""))  # Clear after 3 seconds
 
 def download():
-    if not folderpath:  # Ensure a folder path is set
+    if not folderpath:
         show_message("Please select a path to save your file at first.", "red")
         return
 
     name = entry_name.get().strip() or "%(uploader)s"
     filename = entry_filename.get().strip() or "%(title)s"
+    url = input_url.get()
 
-    start_hour = start_hour_entry.get().strip() or "00"
-    start_minute = start_minute_entry.get().strip() or "00"
-    start_second = start_second_entry.get().strip() or "00"
+    # Format the output file path
+    output_template = os.path.join(folderpath, f"{name} {filename}.mp4")
 
-    end_hour = end_hour_entry.get().strip() or "00"
-    end_minute = end_minute_entry.get().strip() or "00"
-    end_second = end_second_entry.get().strip() or "00"
+    # Run yt-dlp to get the best format available
+    cmd = [
+        "yt-dlp", "-f", "bv*+ba/b",  # Get best video and audio, fallback to best single format
+        "--merge-output-format", "mp4",  # Force output to mp4
+        "-o", output_template,
+        url
+    ]
 
-    # Formatierung der Start- und Endzeiten
-    start_time = f"{start_hour}:{start_minute}:{start_second}"
-    end_time = f"{end_hour}:{end_minute}:{end_second}"
+    # Run the download command and check the result
+    result = subprocess.run(cmd, capture_output=True, text=True)
 
-    # the --postprocessor-args part for trimming the video does not work yet...
-    cmd = f'yt-dlp -o "{folderpath}\\{name} {filename}.mp4" -f bestvideo[ext=mp4] {input_url.get()} --postprocessor-args "-ss {start_time} -to {end_time}"'
-    
-    result = os.system(cmd)
-    if result == 0:  # Check for successful download
+    # Check for errors in the output
+    if result.returncode == 0:
         show_message("Download successful!", "green")
     else:
-        show_message("Download failed!", "red")
+        show_message("Download failed: " + result.stderr, "red")
 
 root = tk.Tk()
 root.title("Video Ripper")
