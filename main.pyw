@@ -1,12 +1,13 @@
-# the yt-dlp.exe must be placed in the same folder as this script
 import os
 import tkinter as tk
-import subprocess
 from tkinter import ttk
 from tkinter.filedialog import askdirectory
+from yt_dlp import YoutubeDL
+import imageio_ffmpeg
 
-# Globale Variable für den Ordnerpfad
+# Globale Variablen
 folderpath = ""
+ffmpeg_path = imageio_ffmpeg.get_ffmpeg_exe()
 
 def save(): 
     global folderpath
@@ -38,14 +39,21 @@ def download():
         url
     ]
 
-    # Run the download command and check the result
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    ydl_opts = {
+        'format': 'bv*+ba/b',
+        'merge_output_format': 'mp4',
+        'outtmpl': output_template,
+        'ffmpeg_location': ffmpeg_path,
+        'quiet': True,
+        'no_warnings': True,
+    }
 
-    # Check for errors in the output
-    if result.returncode == 0:
-        show_message("Download successful!", "green")
-    else:
-        show_message("Download failed: " + result.stderr, "red")
+    try:
+        with YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
+        show_message("Download erfolgreich!", "green")
+    except Exception as e:
+        show_message(f"Fehler beim Download: {e}", "red")
 
 root = tk.Tk()
 root.title("Video Ripper")

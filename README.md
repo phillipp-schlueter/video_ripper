@@ -1,7 +1,12 @@
 This is a simple Video downloader for websites using python tkinter and yt-dlp.
 Nothing special but helps me out a ton.
 
-Step by Step Guid:
+## Setup
+pip install imageio-ffmpeg
+pip install ffmpeg
+pip install yt-dlp
+
+## Step by Step Guid:
 1. Run python script
 2. Add artist - if you don't the uploaders name from the website will be choosen automaticly
 3. Add filename - if you don't the filename from the website will be choosen automaticly
